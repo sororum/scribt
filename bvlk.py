@@ -1,0 +1,57 @@
+#!/usr/bin/python
+
+import getpass
+import os
+import sys
+
+exec_dir = os.getcwd()
+pwd = os.listdir(exec_dir)
+username = getpass.getuser()
+
+
+normal_files = next(os.walk(exec_dir))[2]
+hidden_files = [i for i in normal_files if i.startswith(".")]
+# only one level of sub directories
+normal_sub_dirs = next(os.walk(exec_dir))[1]
+hidden_sub_dirs = [i for i in normal_sub_dirs if i.startswith(".")]
+
+
+def randint():
+    r = os.urandom(6).hex()
+    return r
+
+
+def read_dir():
+    print(f"In the current directory: {exec_dir}")
+    print(
+        f"""    {len(normal_files)} 📄 in total, {len(hidden_files)} of which are hidden.
+    {len(normal_sub_dirs)} 📁 in total, {len(hidden_sub_dirs)} of which are hidden."""
+    )
+
+
+def rename(f):
+    old_name, ext = os.path.splitext(f)
+    new_name = randint()
+    os.rename(f"{exec_dir}/{old_name}{ext}", f"{exec_dir}/{new_name}{ext}")
+    print(f"{f} -> {new_name}{ext}")
+
+
+def prompt(inp):
+    if inp == "y":
+        for f in pwd:
+            rename(f)
+    elif inp == "n" or " ":
+        sys.exit()
+    else:
+        print("Input incomprehensible.")
+        sys.exit()
+
+
+try:
+    read_dir()
+    prompt_input = input("Proceed? [y/N] ")
+    prompt(prompt_input)
+
+except (KeyboardInterrupt, SystemExit):
+    print("❌Canceled...!")
+    sys.exit()
