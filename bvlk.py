@@ -67,10 +67,23 @@ def prompt(inp):
 
 
 try:
-    read_dir()
-    prompt_input = input("Proceed? [y/N] ")
-    prompt(prompt_input)
+
+    if not exec_dir.startswith("/home/") or exec_dir.endswith("/home/"):
+        print("Prohibited directory. Abborted!")
+        sys.exit()
+
+    elif exec_dir.endswith(f"/home/{username}"):
+        read_dir()
+        print("Running in the XDG User Directories!")
+
+        prompt_input = input("Proceed? [y/N] ")
+        prompt(prompt_input)
+
+    else:
+        read_dir()
+        prompt_input = input("Proceed? [y/N] ")
+        prompt(prompt_input)
 
 except (KeyboardInterrupt, SystemExit):
-    print("❌Canceled...!")
+    print("\n❌Canceled...!")
     sys.exit()
