@@ -32,8 +32,14 @@ def read_dir():
 def rename(f):
     old_name, ext = os.path.splitext(f)
     new_name = randint()
-    os.rename(f"{exec_dir}/{old_name}{ext}", f"{exec_dir}/{new_name}{ext}")
-    print(f"{f} -> {new_name}{ext}")
+
+    if not old_name.startswith("."):
+        os.rename(f"{exec_dir}/{old_name}{ext}", f"{exec_dir}/{new_name}{ext}")
+        print(f"{f} -> {new_name}{ext}")
+
+    else:
+        os.rename(f"{exec_dir}/{old_name}{ext}", f"{exec_dir}/.{new_name}{ext}")
+        print(f"{f} -> .{new_name}{ext}")
 
 
 def prompt(inp):
