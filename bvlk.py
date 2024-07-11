@@ -42,10 +42,23 @@ def rename(f):
         print(f"{f} -> .{new_name}{ext}")
 
 
-def prompt(inp):
-    if inp == "y":
+def main():
+    script_name = "bvlk.py"
+
+    if script_name not in pwd:
         for f in pwd:
             rename(f)
+    else:
+        pwd.append(pwd.pop(pwd.index(script_name)))
+        print("\nThe script is potentially in the directory. Ignored!")
+        pwd.remove(script_name)
+        for f in pwd:
+            rename(f)
+
+
+def prompt(inp):
+    if inp == "y":
+        main()
     elif inp == "n" or " ":
         sys.exit()
     else:
