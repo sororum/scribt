@@ -4,6 +4,19 @@ import getpass
 import os
 import sys
 
+
+class colors:
+    PURPLE = "\033[95m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+    ENDC = "\033[0m"
+
+
 exec_dir = os.getcwd()
 pwd = os.listdir(exec_dir)
 username = getpass.getuser()
@@ -22,10 +35,10 @@ def randint():
 
 
 def read_dir():
-    print(f"In the current directory: {exec_dir}")
+    print(f"{colors.BOLD}In the current directory:{colors.ENDC} {exec_dir}")
     print(
-        f"""    {len(normal_files)} 📄 in total, {len(hidden_files)} of which are hidden.
-    {len(normal_sub_dirs)} 📁 in total, {len(hidden_sub_dirs)} of which are hidden."""
+        f"""    {colors.CYAN}{len(normal_files)}{colors.ENDC} 📄 in total, {colors.PURPLE}{len(hidden_files)}{colors.ENDC} of which are hidden.
+    {colors.CYAN}{len(normal_sub_dirs)}{colors.ENDC} 📁 in total, {colors.PURPLE}{len(hidden_sub_dirs)}{colors.ENDC} of which are hidden."""
     )
 
 
@@ -35,11 +48,21 @@ def rename(f):
 
     if not old_name.startswith("."):
         os.rename(f"{exec_dir}/{old_name}{ext}", f"{exec_dir}/{new_name}{ext}")
-        print(f"{f} -> {new_name}{ext}")
+        print(
+            colors.BOLD
+            + f"{f}{colors.PURPLE} -> {colors.ENDC}"
+            + f"{colors.CYAN}{new_name}{ext}{colors.ENDC}"
+            + colors.ENDC
+        )
 
     else:
         os.rename(f"{exec_dir}/{old_name}{ext}", f"{exec_dir}/.{new_name}{ext}")
-        print(f"{f} -> .{new_name}{ext}")
+        print(
+            colors.BOLD
+            + f"{f}{colors.PURPLE} -> {colors.ENDC}"
+            + f"{colors.CYAN}.{new_name}{ext}{colors.ENDC}"
+            + colors.ENDC
+        )
 
 
 def main():
@@ -50,7 +73,9 @@ def main():
             rename(f)
     else:
         pwd.append(pwd.pop(pwd.index(script_name)))
-        print("\nThe script is potentially in the directory. Ignored!")
+        print(
+            f"{colors.YELLOW}\nThe script is potentially in the directory. {colors.BOLD}Ignored!{colors.ENDC}{colors.ENDC}"
+        )
         pwd.remove(script_name)
         for f in pwd:
             rename(f)
@@ -62,28 +87,40 @@ def prompt(inp):
     elif inp == "n" or " ":
         sys.exit()
     else:
-        print("Input incomprehensible.")
+        print(f"{colors.YELLOW}Input incomprehensible.")
         sys.exit()
 
 
 try:
 
     if not exec_dir.startswith("/home/") or exec_dir.endswith("/home/"):
-        print("Prohibited directory. Abborted!")
+        print(
+            colors.BOLD
+            + f"{colors.YELLOW}Prohibited directory.{colors.ENDC} {colors.RED}Abborted!"
+            + colors.ENDC
+        )
         sys.exit()
 
     elif exec_dir.endswith(f"/home/{username}"):
         read_dir()
-        print("Running in the XDG User Directories!")
+        print(
+            colors.BOLD
+            + f"{colors.YELLOW}Running in the XDG User Directories!{colors.ENDC}"
+            + colors.ENDC
+        )
 
-        prompt_input = input("Proceed? [y/N] ")
+        prompt_input = input(
+            f"{colors.BOLD}{colors.UNDERLINE}Proceed?{colors.ENDC} {colors.BOLD}[y/N] {colors.ENDC}"
+        )
         prompt(prompt_input)
 
     else:
         read_dir()
-        prompt_input = input("Proceed? [y/N] ")
+        prompt_input = input(
+            f"{colors.BOLD}{colors.UNDERLINE}Proceed?{colors.ENDC} {colors.BOLD}[y/N] {colors.ENDC}"
+        )
         prompt(prompt_input)
 
 except (KeyboardInterrupt, SystemExit):
-    print("\n❌Canceled...!")
+    print(colors.BOLD + f"\n{colors.RED}❌Canceled...!{colors.ENDC}" + colors.ENDC)
     sys.exit()
