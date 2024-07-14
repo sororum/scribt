@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import argparse
 import getpass
 import os
 import sys
@@ -17,10 +18,30 @@ class colors:
     ENDC = "\033[0m"
 
 
-exec_dir = os.getcwd()
+parser = argparse.ArgumentParser(
+    prog="bvlk",
+    description="Yet another bulk rename utility.",
+)
+parser.add_argument(
+    "directory",
+    help="specify target directory",
+    action="store",
+    type=str,
+)
+args = parser.parse_args()
+
+
+if args.directory == ".":
+    exec_dir = os.getcwd()
+elif not args.directory == "." and os.path.isdir(args.directory):
+    exec_dir = args.directory
+else:
+    print(colors.BOLD + f"{colors.RED}Directory is not valid!")
+    sys.exit()
+
+
 pwd = os.listdir(exec_dir)
 username = getpass.getuser()
-
 
 normal_files = next(os.walk(exec_dir))[2]
 hidden_files = [i for i in normal_files if i.startswith(".")]
