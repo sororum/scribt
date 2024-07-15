@@ -21,24 +21,25 @@ class colors:
 parser = argparse.ArgumentParser(
     prog="bvlk",
     description="Yet another bulk rename utility.",
+    epilog="By default, it only affects files (that are not hidden), when no argument is passed.",
 )
-parser.add_argument(
-    "directory",
-    help="specify target directory",
-    action="store",
-    type=str,
-)
+parser.add_argument("-f", "--files", action="store_true", help="include files")
+parser.add_argument("-d", "--dirs", action="store_true", help="include directories")
+parser.add_argument("-i", "--hidden_files", action="store_true", help="include hidden files")
+parser.add_argument("-o", "--hidden_dirs", action="store_true", help="include hidden directories")
+parser.add_argument("path", help="specify target path", action="store", type=str)
+
 args = parser.parse_args()
 
-
-if args.directory == ".":
+if args.path == ".":
     exec_dir = os.getcwd()
-elif not args.directory == "." and os.path.isdir(args.directory):
-    exec_dir = args.directory
+elif args.path == "..":
+    exec_dir = os.path.dirname(os.getcwd())
+elif not args.path == "." and os.path.isdir(args.path):
+    exec_dir = args.path
 else:
     print(colors.BOLD + f"{colors.RED}Directory is not valid!")
     sys.exit()
-
 
 pwd = os.listdir(exec_dir)
 username = getpass.getuser()
@@ -66,24 +67,40 @@ def read_dir():
 def rename(f):
     old_name, ext = os.path.splitext(f)
     new_name = randint()
+    source_rename = f"{exec_dir}/{old_name}{ext}"
+    normal_rename = f"{exec_dir}/{new_name}{ext}"
+    hidden_rename = f"{exec_dir}/.{new_name}{ext}"
+    argument = any((args.dirs, args.hidden_files, args.hidden_dirs))
 
-    if not old_name.startswith("."):
-        os.rename(f"{exec_dir}/{old_name}{ext}", f"{exec_dir}/{new_name}{ext}")
-        print(
-            colors.BOLD
-            + f"{f}{colors.PURPLE} -> {colors.ENDC}"
-            + f"{colors.CYAN}{new_name}{ext}{colors.ENDC}"
-            + colors.ENDC
-        )
+    normal_renamed = (
+        colors.BOLD
+        + f"{f}{colors.PURPLE} -> {colors.ENDC}"
+        + f"{colors.CYAN}{new_name}{ext}{colors.ENDC}"
+        + colors.ENDC
+    )
+    hidden_renamed = (
+        colors.BOLD
+        + f"{f}{colors.PURPLE} -> {colors.ENDC}"
+        + f"{colors.CYAN}.{new_name}{ext}{colors.ENDC}"
+        + colors.ENDC
+    )
 
-    else:
-        os.rename(f"{exec_dir}/{old_name}{ext}", f"{exec_dir}/.{new_name}{ext}")
-        print(
-            colors.BOLD
-            + f"{f}{colors.PURPLE} -> {colors.ENDC}"
-            + f"{colors.CYAN}.{new_name}{ext}{colors.ENDC}"
-            + colors.ENDC
-        )
+    if (
+        not old_name.startswith(".")
+        and os.path.isfile(f)
+        and (not argument or args.files)
+    ):
+        os.rename(source_rename, normal_rename)
+        print(normal_renamed)
+    elif not old_name.startswith(".") and os.path.isdir(f) and args.dirs:
+        os.rename(source_rename, normal_rename)
+        print(normal_renamed)
+    elif old_name.startswith(".") and os.path.isfile(f) and args.hidden_files:
+        os.rename(source_rename, hidden_rename)
+        print(hidden_renamed)
+    elif old_name.startswith(".") and os.path.isdir(f) and args.hidden_dirs:
+        os.rename(source_rename, hidden_rename)
+        print(hidden_renamed)
 
 
 def main():
