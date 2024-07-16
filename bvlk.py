@@ -119,14 +119,16 @@ def main():
             rename(f)
 
 
-def prompt(inp):
-    if inp == "y":
+def prompt():
+    prompt_input = input(
+        f"{colors.BOLD}{colors.UNDERLINE}Proceed?{colors.ENDC} {colors.BOLD}[y/N] {colors.ENDC}"
+    )
+    if prompt_input.casefold().strip() == "y":
         main()
-    elif inp == "n" or " ":
+    elif prompt_input.casefold().strip() == "n" or not prompt_input.strip():
         sys.exit()
     else:
-        print(f"{colors.YELLOW}Input incomprehensible.")
-        sys.exit()
+        print(f"{colors.YELLOW}Input incomprehensible.", file=sys.stderr)
 
 
 try:
@@ -146,18 +148,11 @@ try:
             + f"{colors.YELLOW}Running in the XDG User Directories!{colors.ENDC}"
             + colors.ENDC
         )
-
-        prompt_input = input(
-            f"{colors.BOLD}{colors.UNDERLINE}Proceed?{colors.ENDC} {colors.BOLD}[y/N] {colors.ENDC}"
-        )
-        prompt(prompt_input)
+        prompt()
 
     else:
         read_dir()
-        prompt_input = input(
-            f"{colors.BOLD}{colors.UNDERLINE}Proceed?{colors.ENDC} {colors.BOLD}[y/N] {colors.ENDC}"
-        )
-        prompt(prompt_input)
+        prompt()
 
 except (KeyboardInterrupt, SystemExit):
     print(colors.BOLD + f"\n{colors.RED}❌Canceled...!{colors.ENDC}" + colors.ENDC)
