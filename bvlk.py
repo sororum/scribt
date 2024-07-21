@@ -71,6 +71,8 @@ def rename(f):
     normal_rename = f"{exec_dir}/{new_name}{ext}"
     hidden_rename = f"{exec_dir}/.{new_name}{ext}"
     argument = any((args.dirs, args.hidden_files, args.hidden_dirs))
+    is_file = os.path.isfile(f"{exec_dir}/{f}")
+    is_dir = os.path.isdir(f"{exec_dir}/{f}")
 
     normal_renamed = (
         colors.BOLD
@@ -85,20 +87,16 @@ def rename(f):
         + colors.ENDC
     )
 
-    if (
-        not old_name.startswith(".")
-        and os.path.isfile(f)
-        and (not argument or args.files)
-    ):
+    if not old_name.startswith(".") and is_file and (not argument or args.files):
         os.rename(source_rename, normal_rename)
         print(normal_renamed)
-    elif not old_name.startswith(".") and os.path.isdir(f) and args.dirs:
+    elif not old_name.startswith(".") and is_dir and args.dirs:
         os.rename(source_rename, normal_rename)
         print(normal_renamed)
-    elif old_name.startswith(".") and os.path.isfile(f) and args.hidden_files:
+    elif old_name.startswith(".") and is_file and args.hidden_files:
         os.rename(source_rename, hidden_rename)
         print(hidden_renamed)
-    elif old_name.startswith(".") and os.path.isdir(f) and args.hidden_dirs:
+    elif old_name.startswith(".") and is_dir and args.hidden_dirs:
         os.rename(source_rename, hidden_rename)
         print(hidden_renamed)
 
