@@ -3,6 +3,7 @@
 import argparse
 import getpass
 import os
+import re
 import sys
 
 
@@ -27,6 +28,9 @@ parser.add_argument("-f", "--files", action="store_true", help="include files")
 parser.add_argument("-d", "--dirs", action="store_true", help="include directories")
 parser.add_argument("-i", "--hidden_files", action="store_true", help="include hidden files")
 parser.add_argument("-o", "--hidden_dirs", action="store_true", help="include hidden directories")
+parser.add_argument("-b", "--bandcamp", action="store_true",
+    help="remove artist name and ID number from audio files (yt-dlp naming format for bandcamp)",
+)
 parser.add_argument("path", help="specify target path", action="store", type=str)
 
 args = parser.parse_args()
@@ -64,41 +68,51 @@ def read_dir():
     )
 
 
+def output(original, new, extention, is_hidden=False):
+    if not is_hidden:
+        print(
+            colors.BOLD
+            + f"{original}{colors.PURPLE} -> {colors.ENDC}"
+            + f"{colors.CYAN}{new}{extention}{colors.ENDC}"
+            + colors.ENDC
+        )
+    else:
+        print(
+            colors.BOLD
+            + f"{original}{colors.PURPLE} -> {colors.ENDC}"
+            + f"{colors.CYAN}.{new}{extention}{colors.ENDC}"
+            + colors.ENDC
+        )
+
+
 def rename(f):
     old_name, ext = os.path.splitext(f)
     new_name = randint()
     source_rename = f"{exec_dir}/{old_name}{ext}"
     normal_rename = f"{exec_dir}/{new_name}{ext}"
     hidden_rename = f"{exec_dir}/.{new_name}{ext}"
-    argument = any((args.dirs, args.hidden_files, args.hidden_dirs))
+    argument = any((args.dirs, args.hidden_files, args.hidden_dirs, args.bandcamp))
     is_file = os.path.isfile(f"{exec_dir}/{f}")
     is_dir = os.path.isdir(f"{exec_dir}/{f}")
 
-    normal_renamed = (
-        colors.BOLD
-        + f"{f}{colors.PURPLE} -> {colors.ENDC}"
-        + f"{colors.CYAN}{new_name}{ext}{colors.ENDC}"
-        + colors.ENDC
-    )
-    hidden_renamed = (
-        colors.BOLD
-        + f"{f}{colors.PURPLE} -> {colors.ENDC}"
-        + f"{colors.CYAN}.{new_name}{ext}{colors.ENDC}"
-        + colors.ENDC
-    )
-
     if not old_name.startswith(".") and is_file and (not argument or args.files):
         os.rename(source_rename, normal_rename)
-        print(normal_renamed)
+        output(f, new_name, ext)
     elif not old_name.startswith(".") and is_dir and args.dirs:
         os.rename(source_rename, normal_rename)
-        print(normal_renamed)
+        output(f, new_name, ext)
     elif old_name.startswith(".") and is_file and args.hidden_files:
         os.rename(source_rename, hidden_rename)
-        print(hidden_renamed)
+        output(f, new_name, ext, True)
     elif old_name.startswith(".") and is_dir and args.hidden_dirs:
         os.rename(source_rename, hidden_rename)
-        print(hidden_renamed)
+        output(f, new_name, ext, True)
+    elif not old_name.startswith(".") and is_file and args.bandcamp:
+        no_brackets = "".join(re.split(r"\[.*?\]", old_name)[0])
+        artist_name = re.findall(r".*?\-", no_brackets)[0]
+        song_name = no_brackets.replace(artist_name, "").strip()
+        os.rename(source_rename, f"{exec_dir}/{song_name}{ext}")
+        output(f, song_name, ext)
 
 
 def main():
